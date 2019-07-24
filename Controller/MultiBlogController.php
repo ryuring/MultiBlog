@@ -23,14 +23,14 @@ class MultiBlogController extends AppController {
  *
  * @var array
  */
-	public $components = array('BcContents');
+	public $components = ['BcContents'];
 
 /**
  * モデル
  *
  * @var array
  */
-	public $uses = array('MultiBlog.MultiBlogPost');
+	public $uses = ['MultiBlog.MultiBlogPost'];
 
 /**
  * フロントの記事一覧を表示
@@ -38,13 +38,16 @@ class MultiBlogController extends AppController {
  * @return void
  */
 	public function index () {
-		$datas = $this->MultiBlogPost->find('all', array('conditions' => array(
-			'MultiBlogPost.blog_content_id' => $this->request->params['entityId']
-		)));
-		$blogContent = $this->MultiBlogPost->MultiBlogContent->find('first', array('conditions' => array(
-			'MultiBlogContent.id' => $this->request->params['entityId']
-		)));
-		$this->pageTitle = $blogContent['Content']['title'];
+		$records = $this->MultiBlogPost->find('all', [
+			'conditions' => [
+				'MultiBlogPost.blog_content_id' => $this->request->params['entityId']],
+			'recursive' => -1
+		]);
+		$blogContent = $this->MultiBlogPost->MultiBlogContent->find('first', [
+			'conditions' => [
+				'MultiBlogContent.id' => $this->request->params['entityId']],
+			'recursive' => 0
+		]);
 		if($this->BcContents->preview == 'default' && $this->request->data) {
 			$blogContent = $this->request->data;
 		} elseif($this->BcContents->preview == 'alias') {
@@ -54,8 +57,15 @@ class MultiBlogController extends AppController {
 			$this->notFound();
 		}
 		$this->set('blogContent', $blogContent);
-		$this->set('datas', $datas);
-		$this->set('editLink', array('plugin' => 'multi_blog', 'admin' => true, 'controller' => 'multi_blog_contents', 'action' => 'edit', $this->request->params['entityId']));
+		$this->set('records', $records);
+		$this->set('editLink', [
+			'admin' => true,
+			'plugin' => 'multi_blog',
+			'controller' => 'multi_blog_contents',
+			'action' => 'edit',
+			$this->request->params['entityId']
+		]);
+		$this->pageTitle = $blogContent['Content']['title'];
 	}
 
 /**
@@ -65,19 +75,30 @@ class MultiBlogController extends AppController {
  * @return void
  */
 	public function view($no) {
-		$this->crumbs[] = array('name' => $this->request->params['Content']['title'], 'url' => $this->request->params['Content']['url']);
+		$this->crumbs[] = [
+			'name' => $this->request->params['Content']['title'],
+			'url' => $this->request->params['Content']['url']
+		];
 		$blogContentId = $this->request->params['entityId'];
-		$data = $this->MultiBlogPost->find('first', array('conditions' => array(
-			'MultiBlogPost.blog_content_id' => $blogContentId,
-			'MultiBlogPost.no' => $no
-		)));
-		$blogContent = $this->MultiBlogPost->MultiBlogContent->find('first', array('conditions' => array(
-			'MultiBlogContent.id' => $blogContentId
-		)));
+		$data = $this->MultiBlogPost->find('first', [
+			'conditions' => [
+				'MultiBlogPost.blog_content_id' => $blogContentId,
+				'MultiBlogPost.no' => $no
+		]]);
+		$blogContent = $this->MultiBlogPost->MultiBlogContent->find('first', [
+			'conditions' => [
+				'MultiBlogContent.id' => $blogContentId
+		]]);
 		$this->pageTitle = $data['MultiBlogPost']['title'];
 		$this->set('blogContent', $blogContent);
 		$this->set('data', $data);
-		$this->set('editLink', array('plugin' => 'multi_blog', 'admin' => true, 'controller' => 'multi_blog_posts', 'action' => 'edit', $blogContentId, $data['MultiBlogPost']['id']));
+		$this->set('editLink', [
+			'admin' => true,
+			'plugin' => 'multi_blog',
+			'controller' => 'multi_blog_posts',
+			'action' => 'edit',
+			$blogContentId, $data['MultiBlogPost']['id']
+		]);
 	}
 
 }

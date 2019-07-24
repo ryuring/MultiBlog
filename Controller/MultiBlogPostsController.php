@@ -22,7 +22,10 @@ class MultiBlogPostsController extends AppController {
  * コンポーネント
  * @var array
  */
-	public $components = array('Cookie', 'BcAuth', 'BcAuthConfigure', 'BcContents' => array('type' => 'MultiBlog.MultiBlogContent'));
+	public $components = [
+		'Cookie', 'BcAuth', 'BcAuthConfigure',
+		'BcContents' => ['type' => 'MultiBlog.MultiBlogContent']
+	];
 
 /**
  * サブメニュー

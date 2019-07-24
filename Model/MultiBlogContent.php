@@ -24,7 +24,7 @@ class MultiBlogContent extends AppModel {
  *
  * @var array
  */
-	public $actsAs = array('BcContents');
+	public $actsAs = ['BcContents'];
 
 /**
  * belongsTo
@@ -63,22 +63,20 @@ class MultiBlogContent extends AppModel {
  * @return bool|mixed
  */
 	public function copy($id, $newTitle, $newAuthorId, $newSiteId = null) {
-		$data = $this->find('first', array('conditions' => array('MultiBlogContent.id' => $id)));
-		if(!$data) {
+		$blogContent = $this->find('first', [
+			'conditions' => ['MultiBlogContent.id' => $id]
+		]);
+		if(!$blogContent) {
 			return false;
 		}
-		unset($data['MultiBlogContent']['id']);
-		unset($data['MultiBlogContent']['modified']);
-		unset($data['MultiBlogContent']['created']);
+		unset($blogContent['MultiBlogContent']['id'], $blogContent['MultiBlogContent']['modified'], $blogContent['MultiBlogContent']['created']);
 		$this->getDataSource()->begin();
-		$result = $this->save($data['MultiBlogContent']);
+		$result = $this->save($blogContent['MultiBlogContent']);
 		if($result) {
-			if(!empty($data['MultiBlogPost'])) {
+			if(!empty($blogContent['MultiBlogPost'])) {
 				$no = 1;
-				foreach($data['MultiBlogPost'] as $post) {
-					unset($post['id']);
-					unset($post['modified']);
-					unset($post['created']);
+				foreach($blogContent['MultiBlogPost'] as $post) {
+					unset($post['id'], $post['modified'], $post['created']);
 					$post['blog_content_id'] = $this->id;
 					$post['no'] = $no;
 					$this->MultiBlogPost->create($post);
@@ -89,10 +87,10 @@ class MultiBlogContent extends AppModel {
 			}
 		}
 		if ($result) {
-			$data = $this->Content->copy($data['Content']['id'], $this->id, $newTitle, $newAuthorId, $newSiteId);
-			if($data) {
+			$content = $this->Content->copy($blogContent['Content']['id'], $this->id, $newTitle, $newAuthorId, $newSiteId);
+			if($content) {
 				$this->getDataSource()->commit();
-				return $data;
+				return $content;
 			}
 		}
 		$this->getDataSource()->rollback();

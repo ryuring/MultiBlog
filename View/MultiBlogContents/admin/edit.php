@@ -19,7 +19,7 @@
 <?php echo $this->BcBaser->element('admin/MultiBlogContents/form') ?>
 
 <div class="submit">
-	<?php echo $this->BcForm->submit('保存', array('class' => 'button', 'div' => false)) ?>
+	<?php echo $this->BcForm->submit('保存', ['class' => 'button', 'div' => false]) ?>
 </div>
 
 <?php echo $this->BcForm->end() ?>

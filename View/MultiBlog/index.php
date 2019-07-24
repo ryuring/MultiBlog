@@ -9,22 +9,26 @@
  * @since			baserCMS v 4.0.0
  * @license			http://basercms.net/license/index.html
  */
+
+/**
+ * @var array $records
+ */
 ?>
 
 
-<h1><?php echo h($this->request->params['Content']['title']) ?></h1>
+<h1><?php echo h($blogContent['Content']['title']) ?></h1>
 <p><?php echo h($blogContent['MultiBlogContent']['content']) ?></p>
 
-<?php if($datas): ?>
+<?php if($records): ?>
     <ul>
-        <?php foreach($datas as $data): ?>
+        <?php foreach($records as $record): ?>
             <li>
-                <?php echo $this->BcBaser->link($data['MultiBlogPost']['title'], array(
+                <?php echo $this->BcBaser->link($record['MultiBlogPost']['title'], [
                     'plugin' => '',
                     'controller' => $this->request->params['Content']['url'],
                     'action' => 'view',
-                    $data['MultiBlogPost']['no']
-                )) ?>
+                    $record['MultiBlogPost']['no']
+                ]) ?>
             </li>
         <?php endforeach ?>
     </ul>

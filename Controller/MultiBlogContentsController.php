@@ -20,6 +20,7 @@
  * @property BcAuthComponent $BcAuth
  * @property BcAuthConfigureComponent $BcAuthConfigure
  * @property BcContentsComponent $BcContents
+ * @property BcMessageComponent $BcMessage
  */
 class MultiBlogContentsController extends AppController {
 
@@ -28,29 +29,33 @@ class MultiBlogContentsController extends AppController {
  *
  * @var array
  */
-	public $components = array('Cookie', 'BcAuth', 'BcAuthConfigure', 'BcContents' => array('useForm' => true));
+	public $components = ['Cookie', 'BcAuth', 'BcAuthConfigure', 'BcContents' => ['useForm' => true]];
 
 /**
  * サブメニュー
  *
  * @var array
  */
-	public $subMenuElements = array('multi_blog_contents');
+	public $subMenuElements = ['multi_blog_contents'];
 
 /**
  * ブログを追加する
  *
- * @return json Or false
+ * @return string|false
  */
 	public function admin_add() {
 		$this->autoRender = false;
 		if(!$this->request->data) {
 			$this->ajaxError(500, '無効な処理です。');
 		}
-		$this->request->data['MultiBlogContent'] = array('content' => 'ブログの説明文が入ります。');
+		$this->request->data['MultiBlogContent'] = [
+			'content' => 'ブログの説明文が入ります。'
+		];
 		if ($data = $this->MultiBlogContent->save($this->request->data)) {
-			$message = 'マルチブログ「' . $this->request->data['Content']['title'] . '」を追加しました。';
-			$this->setMessage($message, false, true, false);
+			$this->BcMessage->setSuccess(sprintf(
+				"マルチブログ「%s」を追加しました。",
+				$data['Content']['title']
+			));
 			return json_encode($data['Content']);
 		} else {
 			$this->ajaxError(500, '保存中にエラーが発生しました。');
@@ -65,23 +70,27 @@ class MultiBlogContentsController extends AppController {
  * @return void
  */
 	public function admin_edit($id) {
-		$this->pageTitle = 'マルチブログ編集';
 		if(!$this->request->data) {
-			$this->request->data = $this->MultiBlogContent->read(null, $id);
+			$this->request->data = $this->MultiBlogContent->find('first', [
+				'conditions' => ['MultiBlogContent.id' => $id]
+			]);
 		} else {
-			if ($this->MultiBlogContent->save($this->request->data)) {
-				$messege = 'マルチブログ「' . $this->request->data['Content']['title'] . '」を更新しました。';
-				$this->setMessage($messege, false, true);
-				$this->redirect(array(
+			if ($data = $this->MultiBlogContent->save($this->request->data)) {
+				$this->BcMessage->setSuccess(sprintf(
+					"マルチブログ「%s」を更新しました。",
+					$data['Content']['title']
+				));
+				$this->redirect([
 					'plugin' => 'multi_blog',
 					'controller' => 'multi_blog_contents',
 					'action' => 'edit',
 					$id
-				));
+				]);
 			} else {
-				$this->setMessage('保存中にエラーが発生しました。入力内容を確認してください。', true, true);
+				$this->BcMessage->setError("保存中にエラーが発生しました。入力内容を確認してください。");
 			}
 		}
+		$this->pageTitle = 'マルチブログ編集';
 		$this->set('publishLink', $this->request->data['Content']['url']);
 	}
 
@@ -113,8 +122,10 @@ class MultiBlogContentsController extends AppController {
 		}
 		$user = $this->BcAuth->user();
 		if ($data = $this->MultiBlogContent->copy($this->request->data['entityId'], $this->request->data['title'], $user['id'], $this->request->data['siteId'])) {
-			$message = 'マルチブログのコピー「' . $this->request->data['title'] . '」を追加しました。';
-			$this->setMessage($message, false, true, false);
+			$this->BcMessage->setSuccess(sprintf(
+				"マルチブログのコピー「%s」を追加しました。",
+				$data['Content']['title']
+			));
 			return json_encode($data['Content']);
 		} else {
 			$this->ajaxError(500, '保存中にエラーが発生しました。');
